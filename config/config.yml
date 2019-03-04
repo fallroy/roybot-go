@@ -1,0 +1,16 @@
+listenAddr: :8080
+release:
+  version: '@RELEASE_VERSION@'
+  time: '@RELEASE_TIME@'
+
+database:
+  url: '@DB_USER@:@DB_PASSWORD@@@DB_HOST@?charset=utf8&parseTime=true'
+  maxIdleConns: 3
+  maxOpenConns : 5
+
+linebot:
+  adminID: '@LINE_ADMINID@'
+  channel:
+    secret: '@LINE_SECRET@'
+    token: '@LINE_TOKEN@'
+  
