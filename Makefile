@@ -5,11 +5,11 @@ endif
 VERSION=1.0.$(BUILD_NUMBER)
 CONFIG_DIR = $(CURDIR)/config
 PRIVATE_FILE = $(CURDIR)/local/private_data.yml
-DB_USER = $(shell cat )
+GO_SERVER_PID=$(shell pidof roybot)
 
-.PHONY: echoenv clean
+.PHONY: echoenv clean shutdown run
 
-all: echoenv recovery setconfig run
+all: echoenv recovery setconfig shutdown run
 
 echoenv:
 	@echo "*** Environment ***"
@@ -30,7 +30,12 @@ setconfig:
 	@sed -i "s/@LINE_ADMINID@/`cat $(PRIVATE_FILE) | sed '4!d'`/g" $(CONFIG_DIR)/config.yml
 	@sed -i "s/@LINE_SECRET@/`cat $(PRIVATE_FILE) | sed '5!d'`/g" $(CONFIG_DIR)/config.yml
 	@sed -i "s/@LINE_TOKEN@/`cat $(PRIVATE_FILE) | sed '6!d'`/g" $(CONFIG_DIR)/config.yml
-	
+
+shutdown:
+	@echo "*** Shutdown Server ***"
+	@kill -9 $(GO_SERVER_PID) | true
+
 run:
-	go build
-	screen -d -m ./roybot
+	@echo "*** Run Server ***"
+	@go build
+	@screen -d -m ./roybot
