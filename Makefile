@@ -32,4 +32,5 @@ setconfig:
 	@sed -i "s/@LINE_TOKEN@/`cat $(PRIVATE_FILE) | sed '6!d'`/g" $(CONFIG_DIR)/config.yml
 	
 run:
-	go build && ./roybot
+	go build
+	screen -d -m ./roybot
