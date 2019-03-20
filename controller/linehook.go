@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"roybot/config"
+	"roybot/service"
 
 	"github.com/line/line-bot-sdk-go/linebot"
 
@@ -11,7 +12,6 @@ import (
 
 //Callback : Setup https server for receiving request from LINE platform
 func Callback(c *gin.Context) {
-	// fmt.Printf("Hi %+v", config.Conf)
 	events, err := config.Bot.ParseRequest(c.Request)
 	if err != nil {
 		fmt.Printf("Request got error %+v", err)
@@ -23,7 +23,7 @@ func Callback(c *gin.Context) {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
 				if _, err = config.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.Text)).Do(); err != nil {
-					fmt.Printf("ReplyMessage got error %+v", err)
+					service.CallAdmin("ReplyMessage got error", err)
 				}
 			}
 		}
