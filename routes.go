@@ -7,5 +7,5 @@ import (
 )
 
 func configRouter(r *gin.Engine) {
-	r.GET("callback", controller.Callback)
+	r.POST("callback", controller.Callback)
 }
