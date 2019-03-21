@@ -3,7 +3,8 @@ package controller
 import (
 	"fmt"
 	"roybot/config"
-	"roybot/service"
+	"roybot/service/admin"
+	"roybot/service/chat"
 
 	"github.com/line/line-bot-sdk-go/linebot"
 
@@ -22,10 +23,22 @@ func Callback(c *gin.Context) {
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
-				if _, err = config.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.Text)).Do(); err != nil {
-					service.CallAdmin("ReplyMessage got error", err)
+				s := chat.ParseMessage(message.Text)
+				if len(s) > 0 {
+					if _, err = config.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(s)).Do(); err != nil {
+						admin.CallAdmin("ReplyMessage got error", err)
+					}
+				}
+
+			case *linebot.StickerMessage:
+				if _, err = config.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(chat.GetRandomReplay())).Do(); err != nil {
+					admin.CallAdmin("ReplyMessage got error", err)
 				}
 			}
 		}
 	}
+}
+
+func TestCallback(c *gin.Context) {
+	admin.CallAdmin(chat.ParseMessage("rp ft"), nil)
 }
