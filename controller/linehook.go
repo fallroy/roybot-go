@@ -40,5 +40,5 @@ func Callback(c *gin.Context) {
 }
 
 func TestCallback(c *gin.Context) {
-	admin.CallAdmin(chat.ParseMessage("rp ft"), nil)
+	admin.CallAdmin(chat.ParseMessage("rp fs"), nil)
 }

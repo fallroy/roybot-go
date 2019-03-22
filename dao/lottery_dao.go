@@ -1,8 +1,10 @@
 package dao
 
 import (
+	"database/sql"
 	"fmt"
 	"roybot/config"
+	"roybot/model"
 	"roybot/service/admin"
 )
 
@@ -34,4 +36,34 @@ func GetSummary() string {
 		s = fmt.Sprintf("Total : %s\nAvg : %s\nTop10Avg : %s\nConsecutive : %s %%\nSame : %s %%", total, avg, sumtop10avg, consecutive, samerate)
 	}
 	return s
+}
+
+//GetLatestData is func
+func GetLatestData() model.DailyData {
+	// fmt.Printf("issue :" + dailyDate.Issue)
+	rows, err := config.DB.Query("SELECT id, open_date, issue, n1, n2, n3, n4, n5, n6, sp FROM d649 ORDER BY open_date DESC LIMIT 1 ")
+	defer rows.Close()
+	if err != nil {
+		admin.CallAdmin("GetLatestData", err)
+	}
+	m := model.DailyData{}
+	if rows.Next() {
+		if err := rows.Scan(&m.ID, &m.OpenDate, &m.Issue, &m.N1, &m.N2, &m.N3, &m.N4, &m.N5, &m.N6, &m.SP); err != nil {
+			admin.CallAdmin("GetLatestData", err)
+		}
+		return m
+	}
+	return m
+}
+
+func convertToModel(rows *sql.Rows) []model.DailyData {
+	result := make([]model.DailyData, 0)
+	for rows.Next() {
+		m := model.DailyData{}
+		if err := rows.Scan(&m.ID, &m.OpenDate, &m.Issue, &m.N1, &m.N2, &m.N3, &m.N4, &m.N5, &m.N6, &m.SP); err != nil {
+			admin.CallAdmin("convertToModel", err)
+		}
+		result = append(result, m)
+	}
+	return result
 }

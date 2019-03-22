@@ -1,16 +1,23 @@
 package chat
 
 import (
+	"fmt"
 	"math/rand"
 	"roybot/service/finance"
+	"roybot/service/lottery"
 	"time"
 )
 
 // ParseMessage is a func
 func ParseMessage(m string) string {
 	result := ""
+	fmt.Println(m)
 	if m == "rp ft" {
 		result = finance.GetFuture()
+	} else if m == "rp fs" {
+		result = finance.GetForeignFuture()
+	} else if m == "lt s" {
+		result = lottery.GetSummery()
 	} else {
 		result = GetRandomReplay()
 	}
