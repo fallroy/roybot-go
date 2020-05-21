@@ -11,7 +11,7 @@ require (
 	github.com/google/pprof v0.0.0-20190309163659-77426154d546 // indirect
 	github.com/line/line-bot-sdk-go v5.0.0+incompatible
 	github.com/mattn/go-isatty v0.0.4 // indirect
-	github.com/stretchr/testify v1.3.0 // indirect
+	github.com/stretchr/testify v1.3.0
 	github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43 // indirect
 	golang.org/x/arch v0.0.0-20190312162104-788fe5ffcd8c // indirect
 	golang.org/x/net v0.0.0-20190206173232-65e2d4e15006 // indirect

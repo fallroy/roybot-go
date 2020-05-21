@@ -3,8 +3,11 @@ package chat
 import (
 	"fmt"
 	"math/rand"
+	"regexp"
+	"roybot/service/admin"
 	"roybot/service/finance"
 	"roybot/service/lottery"
+	"strings"
 	"time"
 )
 
@@ -18,7 +21,19 @@ func ParseMessage(m string) string {
 		result = finance.GetForeignFuture()
 	} else if m == "lt s" {
 		result = lottery.GetSummery()
+	} else if m == "ver" {
+		result = admin.Version()
 	} else {
+		match, _ := regexp.MatchString("^add [0-9newNEW]{3,6} \\d{1,2} \\d{1,2} \\d{1,2} \\d{1,2} \\d{1,2} \\d{1,2}$", m)
+		if match {
+			s := strings.Split(m, " ")
+			if r, _ := regexp.MatchString("^\\d{6,6}$", s[1]); r {
+
+			} else if r, _ := regexp.MatchString("^[newNEW]{3,3}$", s[1]); r {
+
+			}
+		}
+
 		result = GetRandomReplay()
 	}
 	return result

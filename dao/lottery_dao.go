@@ -6,6 +6,8 @@ import (
 	"roybot/config"
 	"roybot/model"
 	"roybot/service/admin"
+	"strconv"
+	"time"
 )
 
 //GetSummary is a func
@@ -56,6 +58,82 @@ func GetLatestData() model.DailyData {
 	return m
 }
 
+//GetLatestRecord is func
+func GetLatestRecord() model.DailyData {
+	rows, err := config.DB.Query("SELECT id, open_date, issue, n1, n2, n3, n4, n5, n6 FROM d649_record ORDER BY issue DESC LIMIT 1 ")
+	defer rows.Close()
+	if err != nil {
+		admin.CallAdmin("GetLatestRecord", err)
+	}
+	m := model.DailyData{}
+	if rows.Next() {
+		if err := rows.Scan(&m.ID, &m.OpenDate, &m.Issue, &m.N1, &m.N2, &m.N3, &m.N4, &m.N5, &m.N6); err != nil {
+			admin.CallAdmin("GetLatestRecord", err)
+		}
+		return m
+	}
+	return m
+}
+
+//GetRecordByIssue is func
+func GetRecordByIssue(issue string) model.DailyData {
+	rows, err := config.DB.Query("SELECT id, open_date, issue, n1, n2, n3, n4, n5, n6 FROM d649_record WHERE issue = ? LIMIT 1 ", issue)
+	defer rows.Close()
+	if err != nil {
+		admin.CallAdmin("GetRecordByIssue", err)
+	}
+	m := model.DailyData{}
+	if rows.Next() {
+		if err := rows.Scan(&m.ID, &m.OpenDate, &m.Issue, &m.N1, &m.N2, &m.N3, &m.N4, &m.N5, &m.N6); err != nil {
+			admin.CallAdmin("GetRecordByIssue", err)
+		}
+		return m
+	}
+	return m
+}
+
+/*	Insert Functions*/
+
+//Add649New is func
+func Add649New(issue string, n1, n2, n3, n4, n5, n6 int, source, open_date string) {
+	openDate, _ := time.Parse("2006-01-02", open_date)
+	record := model.DailyData{
+		Issue:    issue,
+		OpenDate: openDate,
+		N1:       n1,
+		N2:       n2,
+		N3:       n3,
+		N4:       n4,
+		N5:       n5,
+		N6:       n6,
+		FLDiff:   n6 - n1,
+		SDRate:   getSDRate(n1, n2, n3, n4, n5, n6),
+	}
+	// fmt.Printf("Insert %+v", record)
+	InsertRecordDate(&record, source)
+}
+
+//InsertRecordDate is func
+func InsertRecordDate(dailyDate *model.DailyData, source string) {
+	dailyDate.NSum = dailyDate.N1 + dailyDate.N2 + dailyDate.N3 + dailyDate.N4 + dailyDate.N5 + dailyDate.N6
+	dailyDate.NAvg = dailyDate.NSum / 6
+	// fmt.Printf("Insert %+v \n", dailyDate)
+
+	_, err := config.DB.Exec(
+		"Insert INTO d649_record(id, issue, open_date, n1, n2, n3, n4, n5, n6, n_sum, n_avg, fl_diff, sd_rate, source, created_date, updated_date) VALUES(UUID(),?,?,?,?,?,?,?,?,?,?,?,?,?,SYSDATE(),SYSDATE())",
+		dailyDate.Issue, dailyDate.OpenDate,
+		dailyDate.N1, dailyDate.N2, dailyDate.N3, dailyDate.N4, dailyDate.N5, dailyDate.N6,
+		dailyDate.NSum, dailyDate.NAvg,
+		dailyDate.FLDiff, dailyDate.SDRate, source,
+	)
+
+	if err != nil {
+		admin.CallAdmin("InsertRecordDate", err)
+	}
+
+}
+
+/*	Private Functions	*/
 func convertToModel(rows *sql.Rows) []model.DailyData {
 	result := make([]model.DailyData, 0)
 	for rows.Next() {
@@ -66,4 +144,16 @@ func convertToModel(rows *sql.Rows) []model.DailyData {
 		result = append(result, m)
 	}
 	return result
+}
+
+func getSDRate(nums ...int) string {
+	s, d := 0, 0
+	for _, num := range nums {
+		if num%2 == 0 {
+			d++
+		} else {
+			s++
+		}
+	}
+	return strconv.Itoa(s) + ":" + strconv.Itoa(d)
 }
